@@ -64,7 +64,8 @@ def direct_fetch(fetch:pd.Series,
     fetch_dir = fetch.index.values
     if type(wind_direction)==pd.Series:
         wind_direction = wind_direction.values
-    T = len(wind_direction)
+    else:
+        wind_direction = np.array(wind_direction)
 
     # Normalized absolute difference between fetch and wind direction
     norm_dir = (fetch_dir[np.newaxis,:] - wind_direction[:,np.newaxis])%360

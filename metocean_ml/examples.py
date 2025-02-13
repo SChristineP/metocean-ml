@@ -12,7 +12,7 @@ from sklearn.metrics import mean_absolute_error,mean_squared_error,r2_score,root
 from sklearn.metrics.pairwise import haversine_distances
 from sklearn.decomposition import PCA
 
-from spectra_tools import integrated_parameters
+from .spectra_tools import integrated_parameters
 
 def spectra_prediction_model(
     spec_origin:xr.DataArray, 
