@@ -100,6 +100,8 @@ def effective_fetch(fetch:pd.Series,
     T = len(wind_direction)
     N = int(sector/np.mean(np.diff(fetch.index))) # number of indices within sector
 
+    if N < 5: raise ValueError(f'Number of fetch within sector is too small ({N}).')
+
     # Normalized absolute difference between fetch and wind direction (T x 360)
     norm_dir = (fetch_dir[np.newaxis,:] - wind_direction[:,np.newaxis])%360
     abs_diff = np.minimum(norm_dir, 360 - norm_dir)

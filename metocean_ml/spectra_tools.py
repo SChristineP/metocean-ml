@@ -1,9 +1,8 @@
 import numpy as np
 import xarray as xr
 import pandas as pd
-from scipy.interpolate import CubicSpline, RegularGridInterpolator, interp1d
+from scipy.interpolate import CubicSpline, RegularGridInterpolator
 from scipy.integrate import simpson
-from tqdm import tqdm
     
 def _interpolate_cubic(fp,n):
     '''
@@ -259,6 +258,10 @@ def integrated_parameters(
     directions = directions[sorted_indices]
     spec = spec[...,sorted_indices]
     
+    # Wraparound correction
+    directions = np.concatenate([directions-directions[0],[2*np.pi]])
+    spec = np.concatenate([spec,spec[...,:1]],axis=-1)
+
     # Integration with simpson's rule
     S_f = simpson(spec, x=directions)
     m0 = simpson(S_f, x=frequencies)
@@ -278,10 +281,7 @@ def peak_freq_dir(spec:np.ndarray,
                   directions:np.ndarray,
                   upsample:int=1000):
     '''
-    Method to calculate peak freq and dir by 
-    (1) integrating to obtain 1D spectra,
-    (2) optionally upsampling the 1D spectra using cubic splines,
-    (3) finding the largest value on the upsampled spectras
+    Calculate peak frequency and direction of spectra.
 
     Parameters
     ----------
@@ -301,18 +301,28 @@ def peak_freq_dir(spec:np.ndarray,
         Peak frequency, shape corresponding to the number of input spectra.
     peak_dir : np.ndarray
         Peak directions, shape corresponding to the number of input spectra.
+
+    Notes
+    ------
+    This function first integrates directions to get frequency peak,
+    then integrates over frequencies to get direction peak. In some rare
+    cases will this be different to the overall 2D spectra peaks,
+    and it is much more computationally efficient due to 1D interpolation.
     '''
     
     freq_spec, frequencies = frequency_spectra(spec,frequencies,directions)
     dir_spec, directions = direction_spectra(spec,frequencies,directions)
     
     if upsample:
+        xd = np.linspace(0,360,upsample,endpoint=False)
+        dir_spec = np.concat([dir_spec,dir_spec[:,:1]],axis=-1)
+        directions = np.concat([directions-directions[0],[360]])
+
         xf = _interpolate_cubic(frequencies,upsample)
-        xd = _interpolate_cubic(directions,upsample)
-        freq_spec = np.array([CubicSpline(frequencies,f)(xf) 
-                              for f in tqdm(freq_spec,desc="Calculating peak frequencies...")])
-        dir_spec =  np.array([CubicSpline(directions,d)(xd) 
-                              for d in tqdm(dir_spec,desc="Calculating peak directions...")])
+
+        freq_spec = CubicSpline(frequencies,freq_spec,axis=1)(xf) 
+        dir_spec =  CubicSpline(directions, dir_spec, axis=1,bc_type='periodic')(xd) 
+
         peak_freq = xf[freq_spec.argmax(axis=1)]
         peak_dir = xd[dir_spec.argmax(axis=1)]
 
@@ -357,6 +367,10 @@ def frequency_spectra(
     directions = directions[sorted_indices]
     spec = spec[...,sorted_indices]
     
+    # Wraparound correction
+    directions = np.concatenate([directions-directions[0],[2*np.pi]])
+    spec = np.concatenate([spec,spec[...,:1]],axis=-1)
+
     # Integration with simpson's rule
     S_f = simpson(spec, x=directions)
     

@@ -150,7 +150,7 @@ class Trainer():
                 for g in optimizer.param_groups:
                     g['lr'] = learning_rate
                 if self.verbose:
-                    print(f"No improvement for {self.reduce_lr_patience} epochs. Lr reduced to {self.learning_rate}")
+                    print(f"No improvement for {self.reduce_lr_patience} epochs. Lr reduced to {learning_rate}")
 
         return {"val_loss":val_loss_log,
                 "train_loss":train_loss_log,
