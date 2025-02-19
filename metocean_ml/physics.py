@@ -39,8 +39,7 @@ def uv_to_dirmag(u, v, going_to=True):
     going_to : bool, default True
         Controls direction convention, False gives "from" direction.
     '''
-    direction = np.degrees(np.arctan2(v,u))
-    direction = (90-direction)%360
+    direction = np.degrees(np.arctan2(u,v))
     
     if not going_to:
         direction = (direction+180)%360

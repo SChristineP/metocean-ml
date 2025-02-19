@@ -112,8 +112,8 @@ def scale_2D_spec(  spec:np.ndarray,
     if new_directions.size == 1:
         new_directions = np.linspace(0,360,new_directions,endpoint=False)
 
-    new_spec = interpolate_2D_spec(spec,frequencies,directions,new_frequencies,new_directions,method=method)
-    return new_spec, new_frequencies, new_directions
+    spec = interpolate_2D_spec(spec,frequencies,directions,new_frequencies,new_directions,method=method)
+    return spec, new_frequencies, new_directions
 
 def interpolate_dataarray_spec( spec: xr.DataArray,
                                 new_frequencies: np.ndarray | int = 20,
@@ -315,20 +315,20 @@ def peak_freq_dir(spec:np.ndarray,
     
     if upsample:
         xd = np.linspace(0,360,upsample,endpoint=False)
-        dir_spec = np.concat([dir_spec,dir_spec[:,:1]],axis=-1)
+        dir_spec = np.concat([dir_spec,dir_spec[...,:1]],axis=-1)
         directions = np.concat([directions-directions[0],[360]])
 
         xf = _interpolate_cubic(frequencies,upsample)
 
-        freq_spec = CubicSpline(frequencies,freq_spec,axis=1)(xf) 
-        dir_spec =  CubicSpline(directions, dir_spec, axis=1,bc_type='periodic')(xd) 
+        freq_spec = CubicSpline(frequencies,freq_spec,axis=-1)(xf) 
+        dir_spec =  CubicSpline(directions, dir_spec, axis=-1,bc_type='periodic')(xd) 
 
-        peak_freq = xf[freq_spec.argmax(axis=1)]
-        peak_dir = xd[dir_spec.argmax(axis=1)]
+        peak_freq = xf[freq_spec.argmax(axis=-1)]
+        peak_dir = xd[dir_spec.argmax(axis=-1)]
 
     else:
-        peak_freq = frequencies[freq_spec.argmax(axis=1)]
-        peak_dir = directions[dir_spec.argmax(axis=1)]
+        peak_freq = frequencies[freq_spec.argmax(axis=-1)]
+        peak_dir = directions[dir_spec.argmax(axis=-1)]
 
     return peak_freq, peak_dir
 
