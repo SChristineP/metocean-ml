@@ -4,13 +4,17 @@ channels:
 dependencies:
   - python=>3.9
   - xarray
-  - matplotlib>=3.1
-  - numpy>=1.17
-  - pandas>=2.2.1
+  - matplotlib
+  - numpy
+  - pandas
   - pip
   - scipy
   - pytest
   - scikit-learn
-  - keras
-  - tensorflow
-
+  - pytorch
+  - tqdm
+  - roaring-landmask
+  - shapely
+  - pyproj
+  - contextily
+  - geopandas
