@@ -26,7 +26,7 @@ def interpolate_2D_spec(spec  : np.ndarray,
                         dir0  : np.ndarray,
                         freq1 : np.ndarray,
                         dir1  : np.ndarray,
-                        method: str="cubic"
+                        method: str="linear"
                         ) -> np.ndarray:
     '''
     Interpolate 2D wave spectra from fre0 and dir0 to freq1 and dir1.
@@ -56,7 +56,7 @@ def interpolate_2D_spec(spec  : np.ndarray,
     sorted_indices = np.argsort(dir0)
     dir0 = dir0[sorted_indices]
     spec = spec[...,sorted_indices]
-    
+
     # Create current and new interpolation points.
     points = tuple(np.arange(s) for s in spec.shape[:-2]) + (freq0,dir0)
     coords = tuple(np.arange(s) for s in spec.shape[:-2]) + (freq1,dir1)
@@ -72,7 +72,7 @@ def scale_2D_spec(  spec:np.ndarray,
                     directions  : np.ndarray,
                     new_frequencies: np.ndarray | int = 20,
                     new_directions: np.ndarray | int = 20,
-                    method="cubic"
+                    method="linear"
                     ) -> tuple[np.ndarray,np.ndarray,np.ndarray]:
     '''
     Interpolate wave spectra to a new set of specific frequencies and directions.
@@ -118,7 +118,7 @@ def scale_2D_spec(  spec:np.ndarray,
 def interpolate_dataarray_spec( spec: xr.DataArray,
                                 new_frequencies: np.ndarray | int = 20,
                                 new_directions: np.ndarray | int = 20,
-                                method="cubic"
+                                method="linear"
                                 ):
     '''
     Interpolate 2D wave spectra to a new shape.
