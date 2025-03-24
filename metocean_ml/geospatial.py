@@ -469,7 +469,8 @@ def get_fetch(
         If the point is located on land.
     '''
 
-    if is_land(lat,lon): raise ValueError(f'Point {lat},{lon} is on land.')
+    if is_land(lat,lon): 
+        raise ValueError(f'Point {lat},{lon} is on land.')
 
     # List of directions to search and respective fetch distance (to be filled)
     directions = np.linspace(0,360,directions,endpoint=False)
@@ -477,9 +478,12 @@ def get_fetch(
 
     search_offset = 0
     while np.any(fetch==0):
-        if verbose: print('Iteration {}: Searching {} directions from {} to {} m.'.format(
-                search_offset//step_size_major, np.count_nonzero(fetch==0),
-                search_offset,search_offset+step_size_major))
+        if verbose: 
+            print('Iteration {}: Searching {} directions from {} to {} m.'.format(
+                search_offset//step_size_major, 
+                np.count_nonzero(fetch==0),
+                search_offset,
+                search_offset+step_size_major))
 
         # Distances from center point, we search in blocks e.g. [0,1e4), then [1e4, 2*1e4) etc.
         distances = np.arange(search_offset,search_offset+step_size_major,step_size_minor)

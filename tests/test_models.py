@@ -1,5 +1,4 @@
 import torch
-import pytest
 from metocean_ml.models import LSTM, FNN, LNN
 
 # Test LSTM model

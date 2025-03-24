@@ -9,7 +9,6 @@ from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.svm import SVR
 from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import mean_absolute_error,mean_squared_error,r2_score,root_mean_squared_error
-from sklearn.metrics.pairwise import haversine_distances
 from sklearn.decomposition import PCA
 
 from .spectra_tools import integrated_parameters
@@ -98,11 +97,13 @@ def spectra_prediction_model(
     mse = mean_squared_error(actual_Hs, predicted_Hs)
     mae = mean_absolute_error(actual_Hs, predicted_Hs)
     r2 = r2_score(actual_Hs, predicted_Hs)
+    rmse = root_mean_squared_error(actual_Hs,predicted_Hs)
     
     performance_metrics = {
         "mse": mse,
         "mae": mae,
-        "r2": r2
+        "r2": r2,
+        "rmse": rmse
     }
 
     print(performance_metrics)

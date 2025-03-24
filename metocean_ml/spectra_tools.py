@@ -202,8 +202,8 @@ def _reshape_spectra(spec, frequencies, directions):
     if flat_check or freq_check or dir_check:
         try:
             spec = spec.reshape(spec.shape[:-1]+(len(frequencies),len(directions)))
-        except:
-            raise IndexError("Spec shape does not match frequencies and directions.")
+        except ValueError as e:
+            raise IndexError(f"Spec shape does not match frequencies and directions:\n{e}")
 
     return spec, frequencies, directions
     
@@ -441,9 +441,12 @@ def directional_spec_info(spec:xr.DataArray,
         Dataframe with one row per direction, and associated metadata extracted from the spectrum.
     '''
 
-    if not isinstance(spec,xr.DataArray): raise TypeError("Spec must be dataarray.")
-    if "time" in spec.dims: spec = spec.mean("time")
-    if len(spec.dims)!=2: raise TypeError("Unknown spectra shape. Expected [time, freq, dir] or [freq, dir].")
+    if not isinstance(spec,xr.DataArray): 
+        raise TypeError("Spec must be dataarray.")
+    if "time" in spec.dims: 
+        spec = spec.mean("time")
+    if len(spec.dims)!=2: 
+        raise TypeError("Unknown spectra shape. Expected [time, freq, dir] or [freq, dir].")
     dim_dir = spec.dims[1]
     
     # Integrate energy over frequency to get energy per direction, and create a cublic spline fit.

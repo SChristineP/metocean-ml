@@ -39,7 +39,7 @@ def uv_to_dirmag(u, v, going_to=True):
     going_to : bool, default True
         Controls direction convention, False gives "from" direction.
     '''
-    direction = np.degrees(np.arctan2(u,v))
+    direction = np.degrees(np.arctan2(u,v))%360
     
     if not going_to:
         direction = (direction+180)%360
@@ -99,7 +99,8 @@ def effective_fetch(fetch:pd.Series,
     T = len(wind_direction)
     N = int(sector/np.mean(np.diff(fetch.index))) # number of indices within sector
 
-    if N < 5: raise ValueError(f'Number of fetch within sector is too small ({N}).')
+    if N < 5: 
+        raise ValueError(f'Number of fetch directions ({N}) within chosen sector is too small.')
 
     # Normalized absolute difference between fetch and wind direction (T x 360)
     norm_dir = (fetch_dir[np.newaxis,:] - wind_direction[:,np.newaxis])%360

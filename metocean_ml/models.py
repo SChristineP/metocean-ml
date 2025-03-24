@@ -107,27 +107,39 @@ class FNN(nn.Module):
 
         modules.append(nn.Linear(input_size,layers[0]))
 
-        if activ=="tanh": modules.append(nn.Tanh())
-        if activ=="relu": modules.append(nn.ReLU())
-        if activ=="lrelu": modules.append(nn.LeakyReLU())
-        if activ=="elu": modules.append(nn.ELU())
+        if activ=="tanh": 
+            modules.append(nn.Tanh())
+        if activ=="relu": 
+            modules.append(nn.ReLU())
+        if activ=="lrelu": 
+            modules.append(nn.LeakyReLU())
+        if activ=="elu": 
+            modules.append(nn.ELU())
 
-        if batch_normalization: modules.append(nn.BatchNorm1d(layers[0]))
+        if batch_normalization: 
+            modules.append(nn.BatchNorm1d(layers[0]))
 
-        if dropout_rate: modules.append(nn.Dropout(dropout_rate))
+        if dropout_rate: 
+            modules.append(nn.Dropout(dropout_rate))
 
         for i in range(len(layers)-1):
 
             modules.append(nn.Linear(layers[i],layers[i+1]))
 
-            if activ=="tanh": modules.append(nn.Tanh())
-            if activ=="relu": modules.append(nn.ReLU())
-            if activ=="lrelu": modules.append(nn.LeakyReLU())
-            if activ=="elu": modules.append(nn.ELU())
+            if activ=="tanh": 
+                modules.append(nn.Tanh())
+            if activ=="relu": 
+                modules.append(nn.ReLU())
+            if activ=="lrelu": 
+                modules.append(nn.LeakyReLU())
+            if activ=="elu": 
+                modules.append(nn.ELU())
 
-            if batch_normalization: modules.append(nn.BatchNorm1d(layers[i+1]))
+            if batch_normalization: 
+                modules.append(nn.BatchNorm1d(layers[i+1]))
 
-            if dropout_rate: modules.append(nn.Dropout(dropout_rate))
+            if dropout_rate: 
+                modules.append(nn.Dropout(dropout_rate))
 
         modules.append(nn.Linear(layers[-1],output_size))
         self.net = nn.Sequential(*modules)
@@ -148,4 +160,5 @@ class FNN(nn.Module):
         """
         if len(x.shape)>2:
             return self.net(torch.flatten(x,1))
-        else: return self.net(x)
+        else: 
+            return self.net(x)
