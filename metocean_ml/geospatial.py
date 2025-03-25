@@ -9,10 +9,14 @@ import shapely
 from tqdm import tqdm
 from . import spectra_tools
 
-from roaring_landmask import RoaringLandmask
-from roaring_landmask import LandmaskProvider
-provider = LandmaskProvider.Osm
-landmask = RoaringLandmask.new_with_provider(provider)
+## Temporary avoidance! Until Gaute can fix his package.
+try:
+    from roaring_landmask import RoaringLandmask
+    from roaring_landmask import LandmaskProvider
+    provider = LandmaskProvider.Osm
+    landmask = RoaringLandmask.new_with_provider(provider)
+except ImportError as e:
+    print(f"Could not import roaring-landmask: {e}.")
 
 def is_land(lat,lon):
     """

@@ -23,17 +23,17 @@ class TimeseriesDataset(Dataset):
         0 means contemporary to the last input timestamp.
     '''
     def __init__(self,
-                 input_data: np.ndarray | pd.DataFrame | xr.DataArray,
-                 target_data: np.ndarray | pd.DataFrame | xr.DataArray,
+                 input_data: np.ndarray | pd.DataFrame,
+                 target_data: np.ndarray | pd.DataFrame,
                  input_timestamps: int = 1,
                  time_offset:int = 0):
 
         if input_timestamps < 1: 
             raise ValueError("There must have at least one input.")
         
-        if isinstance(input_data,(pd.DataFrame,xr.DataArray)): 
+        if isinstance(input_data,pd.DataFrame): 
             input_data=input_data.values
-        if isinstance(target_data,(pd.DataFrame,xr.DataArray)): 
+        if isinstance(target_data,pd.DataFrame): 
             target_data=target_data.values
 
         self.X = torch.tensor(input_data,dtype=torch.float)
@@ -77,9 +77,9 @@ class TimeseriesWithContext(Dataset):
         if input_timestamps < 1: 
             raise ValueError("There must have at least one input.")
         
-        if isinstance(input_data,(pd.DataFrame,xr.DataArray)): 
+        if isinstance(input_data,pd.DataFrame): 
             input_data=input_data.values
-        if isinstance(target_data,(pd.DataFrame,xr.DataArray)): 
+        if isinstance(target_data,pd.DataFrame): 
             target_data=target_data.values
 
         self.X = torch.tensor(input_data,dtype=torch.float)

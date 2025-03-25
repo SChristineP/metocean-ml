@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-from ..metocean_ml import physics, geospatial
+from metocean_ml import physics, geospatial
 
 # Load data
 dirname = os.path.dirname(__file__)

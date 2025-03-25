@@ -415,7 +415,7 @@ def direction_spectra(
 
 def directional_spec_info(spec:xr.DataArray,
                           directions=360,
-                          directions_from_energy = True,
+                          directions_from_energy = False,
                           energy_smoothing=0.1):
     '''
     Calculate parameters for each direction, such as Tp, freq, group velocity, energy.
@@ -428,7 +428,7 @@ def directional_spec_info(spec:xr.DataArray,
         Spectra array where the two last dimensions are frequency and direction.
     directions : int or np.ndarray
         Number of directions, or a list of specific directions.
-    directions_from_energy : bool, default True
+    directions_from_energy : bool, default False
         This option allows directions to be distributed with density according
         to the spectral energy density. Used if directions is an integer.
     energy_smoothing : float
