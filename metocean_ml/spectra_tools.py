@@ -26,7 +26,7 @@ def interpolate_2D_spec(spec  : np.ndarray,
                         dir0  : np.ndarray,
                         freq1 : np.ndarray,
                         dir1  : np.ndarray,
-                        method: str="cubic"
+                        method: str="linear"
                         ) -> np.ndarray:
     '''
     Interpolate 2D wave spectra from fre0 and dir0 to freq1 and dir1.
@@ -56,7 +56,7 @@ def interpolate_2D_spec(spec  : np.ndarray,
     sorted_indices = np.argsort(dir0)
     dir0 = dir0[sorted_indices]
     spec = spec[...,sorted_indices]
-    
+
     # Create current and new interpolation points.
     points = tuple(np.arange(s) for s in spec.shape[:-2]) + (freq0,dir0)
     coords = tuple(np.arange(s) for s in spec.shape[:-2]) + (freq1,dir1)
@@ -72,7 +72,7 @@ def scale_2D_spec(  spec:np.ndarray,
                     directions  : np.ndarray,
                     new_frequencies: np.ndarray | int = 20,
                     new_directions: np.ndarray | int = 20,
-                    method="cubic"
+                    method="linear"
                     ) -> tuple[np.ndarray,np.ndarray,np.ndarray]:
     '''
     Interpolate wave spectra to a new set of specific frequencies and directions.
@@ -112,13 +112,13 @@ def scale_2D_spec(  spec:np.ndarray,
     if new_directions.size == 1:
         new_directions = np.linspace(0,360,new_directions,endpoint=False)
 
-    new_spec = interpolate_2D_spec(spec,frequencies,directions,new_frequencies,new_directions,method=method)
-    return new_spec, new_frequencies, new_directions
+    spec = interpolate_2D_spec(spec,frequencies,directions,new_frequencies,new_directions,method=method)
+    return spec, new_frequencies, new_directions
 
 def interpolate_dataarray_spec( spec: xr.DataArray,
                                 new_frequencies: np.ndarray | int = 20,
                                 new_directions: np.ndarray | int = 20,
-                                method="cubic"
+                                method="linear"
                                 ):
     '''
     Interpolate 2D wave spectra to a new shape.
@@ -202,8 +202,8 @@ def _reshape_spectra(spec, frequencies, directions):
     if flat_check or freq_check or dir_check:
         try:
             spec = spec.reshape(spec.shape[:-1]+(len(frequencies),len(directions)))
-        except:
-            raise IndexError("Spec shape does not match frequencies and directions.")
+        except ValueError as e:
+            raise IndexError(f"Spec shape does not match frequencies and directions:\n{e}")
 
     return spec, frequencies, directions
     
@@ -315,20 +315,20 @@ def peak_freq_dir(spec:np.ndarray,
     
     if upsample:
         xd = np.linspace(0,360,upsample,endpoint=False)
-        dir_spec = np.concat([dir_spec,dir_spec[:,:1]],axis=-1)
+        dir_spec = np.concat([dir_spec,dir_spec[...,:1]],axis=-1)
         directions = np.concat([directions-directions[0],[360]])
 
         xf = _interpolate_cubic(frequencies,upsample)
 
-        freq_spec = CubicSpline(frequencies,freq_spec,axis=1)(xf) 
-        dir_spec =  CubicSpline(directions, dir_spec, axis=1,bc_type='periodic')(xd) 
+        freq_spec = CubicSpline(frequencies,freq_spec,axis=-1)(xf) 
+        dir_spec =  CubicSpline(directions, dir_spec, axis=-1,bc_type='periodic')(xd) 
 
-        peak_freq = xf[freq_spec.argmax(axis=1)]
-        peak_dir = xd[dir_spec.argmax(axis=1)]
+        peak_freq = xf[freq_spec.argmax(axis=-1)]
+        peak_dir = xd[dir_spec.argmax(axis=-1)]
 
     else:
-        peak_freq = frequencies[freq_spec.argmax(axis=1)]
-        peak_dir = directions[dir_spec.argmax(axis=1)]
+        peak_freq = frequencies[freq_spec.argmax(axis=-1)]
+        peak_dir = directions[dir_spec.argmax(axis=-1)]
 
     return peak_freq, peak_dir
 
@@ -415,7 +415,7 @@ def direction_spectra(
 
 def directional_spec_info(spec:xr.DataArray,
                           directions=360,
-                          directions_from_energy = True,
+                          directions_from_energy = False,
                           energy_smoothing=0.1):
     '''
     Calculate parameters for each direction, such as Tp, freq, group velocity, energy.
@@ -428,7 +428,7 @@ def directional_spec_info(spec:xr.DataArray,
         Spectra array where the two last dimensions are frequency and direction.
     directions : int or np.ndarray
         Number of directions, or a list of specific directions.
-    directions_from_energy : bool, default True
+    directions_from_energy : bool, default False
         This option allows directions to be distributed with density according
         to the spectral energy density. Used if directions is an integer.
     energy_smoothing : float
@@ -441,9 +441,12 @@ def directional_spec_info(spec:xr.DataArray,
         Dataframe with one row per direction, and associated metadata extracted from the spectrum.
     '''
 
-    if not isinstance(spec,xr.DataArray): raise TypeError("Spec must be dataarray.")
-    if "time" in spec.dims: spec = spec.mean("time")
-    if len(spec.dims)!=2: raise TypeError("Unknown spectra shape. Expected [time, freq, dir] or [freq, dir].")
+    if not isinstance(spec,xr.DataArray): 
+        raise TypeError("Spec must be dataarray.")
+    if "time" in spec.dims: 
+        spec = spec.mean("time")
+    if len(spec.dims)!=2: 
+        raise TypeError("Unknown spectra shape. Expected [time, freq, dir] or [freq, dir].")
     dim_dir = spec.dims[1]
     
     # Integrate energy over frequency to get energy per direction, and create a cublic spline fit.

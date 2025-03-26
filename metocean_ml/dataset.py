@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 
 class TimeseriesDataset(Dataset):
     '''
@@ -23,15 +23,18 @@ class TimeseriesDataset(Dataset):
         0 means contemporary to the last input timestamp.
     '''
     def __init__(self,
-                 input_data: np.ndarray | pd.DataFrame | xr.DataArray,
-                 target_data: np.ndarray | pd.DataFrame | xr.DataArray,
+                 input_data: np.ndarray | pd.DataFrame,
+                 target_data: np.ndarray | pd.DataFrame,
                  input_timestamps: int = 1,
                  time_offset:int = 0):
 
-        if input_timestamps < 1: raise ValueError("There must have at least one input.")
+        if input_timestamps < 1: 
+            raise ValueError("There must have at least one input.")
         
-        if isinstance(input_data,(pd.DataFrame,xr.DataArray)): input_data=input_data.values
-        if isinstance(target_data,(pd.DataFrame,xr.DataArray)): target_data=target_data.values
+        if isinstance(input_data,pd.DataFrame): 
+            input_data=input_data.values
+        if isinstance(target_data,pd.DataFrame): 
+            target_data=target_data.values
 
         self.X = torch.tensor(input_data,dtype=torch.float)
         self.Y = torch.tensor(target_data,dtype=torch.float)
@@ -71,10 +74,13 @@ class TimeseriesWithContext(Dataset):
                  target_data: np.ndarray | pd.DataFrame | xr.DataArray,
                  input_timestamps: int = 1):
 
-        if input_timestamps < 1: raise ValueError("There must have at least one input.")
+        if input_timestamps < 1: 
+            raise ValueError("There must have at least one input.")
         
-        if isinstance(input_data,(pd.DataFrame,xr.DataArray)): input_data=input_data.values
-        if isinstance(target_data,(pd.DataFrame,xr.DataArray)): target_data=target_data.values
+        if isinstance(input_data,pd.DataFrame): 
+            input_data=input_data.values
+        if isinstance(target_data,pd.DataFrame): 
+            target_data=target_data.values
 
         self.X = torch.tensor(input_data,dtype=torch.float)
         self.C = torch.tensor(input_context,dtype=torch.float)

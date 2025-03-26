@@ -39,8 +39,7 @@ def uv_to_dirmag(u, v, going_to=True):
     going_to : bool, default True
         Controls direction convention, False gives "from" direction.
     '''
-    direction = np.degrees(np.arctan2(v,u))
-    direction = (90-direction)%360
+    direction = np.degrees(np.arctan2(u,v))%360
     
     if not going_to:
         direction = (direction+180)%360
@@ -62,7 +61,7 @@ def direct_fetch(fetch:pd.Series,
     '''
 
     fetch_dir = fetch.index.values
-    if type(wind_direction)==pd.Series:
+    if isinstance(wind_direction,pd.Series):
         wind_direction = wind_direction.values
     else:
         wind_direction = np.array(wind_direction)
@@ -94,13 +93,14 @@ def effective_fetch(fetch:pd.Series,
     '''
 
     fetch_dir = fetch.index.values
-    if type(wind_direction)==pd.Series:
+    if isinstance(wind_direction,pd.Series):
         wind_direction = wind_direction.values
 
     T = len(wind_direction)
     N = int(sector/np.mean(np.diff(fetch.index))) # number of indices within sector
 
-    if N < 5: raise ValueError(f'Number of fetch within sector is too small ({N}).')
+    if N < 5: 
+        raise ValueError(f'Number of fetch directions ({N}) within chosen sector is too small.')
 
     # Normalized absolute difference between fetch and wind direction (T x 360)
     norm_dir = (fetch_dir[np.newaxis,:] - wind_direction[:,np.newaxis])%360
@@ -150,7 +150,7 @@ def fetch_laws(
 
     """
     
-    if type(wind)==pd.Series:
+    if isinstance(wind,pd.Series):
         index = wind.index
         wind = wind.values
         return_df = True
@@ -208,12 +208,18 @@ def fetch_law_Holthuijsen(
     F_hat = (g*fetch)/np.power(wind,2)
     
     # Empirical constants, from the reference.
-    H_inf = 0.24;   T_inf = 7.69
-    k_1 = 4.41e-4;  k_2 = 2.77e-7
-    k_3 = 0.343;    k_4 = 0.10
-    m_1 = 0.79;     m_2 = 1.45
-    m_3 = 1.14;     m_4 = 2.01
-    p = 0.572;      q = 0.187
+    H_inf = 0.24
+    T_inf = 7.69
+    k_1 = 4.41e-4
+    k_2 = 2.77e-7
+    k_3 = 0.343
+    k_4 = 0.10
+    m_1 = 0.79
+    m_2 = 1.45
+    m_3 = 1.14
+    m_4 = 2.01
+    p = 0.572
+    q = 0.187
 
     H_hat = H_inf*np.power(np.tanh(k_3*np.power(d_hat,m_3)) * np.tanh((k_1*np.power(F_hat,m_1))/(np.tanh(k_3*np.power(d_hat,m_3)))),p)
     T_hat = T_inf*np.power(np.tanh(k_4*np.power(d_hat,m_4)) * np.tanh((k_2*np.power(F_hat,m_2))/(np.tanh(k_4*np.power(d_hat,m_4)))),q)
