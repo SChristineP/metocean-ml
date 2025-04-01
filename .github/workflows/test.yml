@@ -20,12 +20,12 @@ jobs:
         os: ["ubuntu", "windows"]
         python-version: [ '3.8', '3.9', '3.10', '3.11' ]
     steps:
-      - uses: actions/checkout@v2
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: actions/checkout@v4
+      - uses: conda-incubator/setup-miniconda@v3
         with:
           environment-file: environment.yml
           miniforge-version: latest
-          miniforge-variant: Mambaforge
+          miniforge-variant: Miniforge3
       - name: Install Poetry
         uses: snok/install-poetry@v1
       - name: Run tests and build wheels
@@ -35,7 +35,7 @@ jobs:
           poetry build
       - name: Upload wheels
         if: matrix.python-version == '3.10' && matrix.os == 'ubuntu'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: dist
@@ -46,14 +46,14 @@ jobs:
     if: "startsWith(github.ref, 'refs/tags/')"
     needs: [ tests ]
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           name: wheels
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@v3
         with:
           python-version: '3.10'
           miniforge-version: latest
-          miniforge-variant: Mambaforge
+          miniforge-variant: Miniforge3
       - name: Publish to PyPi
         env:
           TWINE_USERNAME: __token__
