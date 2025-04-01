@@ -104,7 +104,7 @@ def restore_array(data,coords):
 
 
 
-def merge_datasets(data:list[pd.DataFrame,np.ndarray,xr.DataArray,xr.Dataset],
+def merge_datasets(data:list[pd.DataFrame|np.ndarray|xr.DataArray|xr.Dataset],
                    keys=None,
                    resample = "1h",
                    join = "inner",
@@ -132,6 +132,11 @@ def merge_datasets(data:list[pd.DataFrame,np.ndarray,xr.DataArray,xr.Dataset],
         Dictionary of metadata containing the coordinates of the original ND arrays,
         which can be used to restore the original shape from the dataframe.
     """
+
+    for i,d in enumerate(data):
+        if isinstance(d,pd.DataFrame) and isinstance(d.columns,(pd.MultiIndex,list,tuple)):
+            print(f"WARNING: Dataset {i} has multiindex columns. These will be merged into single level string columns. ")
+        
     if keys and (len(keys) != len(data)):
         raise ValueError(f"Got len(data)=={len(data)} while len(keys)=={len(keys)}.")
     if not keys:
