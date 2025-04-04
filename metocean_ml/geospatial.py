@@ -442,6 +442,8 @@ def get_fetch(
     directions=360,
     step_size_minor=10,
     step_size_major=1e4,
+    max_search_distance=None,
+    return_landfall=False,
     verbose = False
     ):
     '''
@@ -480,10 +482,17 @@ def get_fetch(
     directions = np.linspace(0,360,directions,endpoint=False)
     fetch = np.zeros_like(directions)
 
+    if return_landfall:
+        landfall_lats = np.zeros_like(directions)
+        landfall_lons = np.zeros_like(directions)
+
+    if not max_search_distance:
+        max_search_distance = 1e12
+
     search_offset = 0
-    while np.any(fetch==0):
+    while np.any(fetch==0) and ((search_offset+step_size_major)<=max_search_distance):
         if verbose: 
-            print('Iteration {}: Searching {} directions from {} to {} m.'.format(
+            print('Iteration {:d}: Searching {:d} directions from {:d} to {:d} m.'.format(
                 search_offset//step_size_major, 
                 np.count_nonzero(fetch==0),
                 search_offset,
@@ -497,13 +506,35 @@ def get_fetch(
         land = is_land(lats,lons)
 
         # Fetch is calculated relative to the block we are searching
-        offset_fetch = np.argmax(land,axis=1)*step_size_minor
+        offset_fetch = np.argmax(land,axis=1)
+
+        # Where land was found this iteration, add to landfall arrays
+        lfmask = fetch==0
+        lfmask[fetch==0] = offset_fetch!=0
+        landfall_lats[lfmask] = lats[offset_fetch!=0, offset_fetch[offset_fetch!=0]]
+        landfall_lons[lfmask] = lons[offset_fetch!=0, offset_fetch[offset_fetch!=0]]
 
         # Then nonzero entries (fetch) are increased with the block offset
-        offset_fetch[offset_fetch!=0] = offset_fetch[offset_fetch!=0] + search_offset
+        offset_fetch[offset_fetch!=0] = step_size_minor*offset_fetch[offset_fetch!=0] + search_offset
 
         # Offset fetch (zero and nonzero entries) are added to the overall fetch vector
         fetch[fetch==0] = offset_fetch
         search_offset += step_size_major
+
+    if np.any(fetch==0):
+        print(f"Warning: no land found in directions {directions[fetch==0]}.\n"
+              f"These will be filled with max_search_distance {max_search_distance}.")
+        landfall_lats[fetch==0] = lats[offset_fetch==0,-1]
+        landfall_lons[fetch==0] = lons[offset_fetch==0,-1]
+        fetch[fetch==0] = max_search_distance
+
+    if return_landfall:
+        return pd.DataFrame(data={
+            "dir_from":directions,
+            "dir_to":(directions+180)%360,
+            "r":fetch,
+            "lat":landfall_lats,
+            "lon":landfall_lons,
+        })
 
     return pd.Series(data=fetch,index=directions,name='Fetch').rename_axis('Direction')
