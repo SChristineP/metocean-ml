@@ -171,6 +171,17 @@ def align_dataframes(input_data:pd.DataFrame,target_data:pd.DataFrame):
     pd.DataFrame
         Inference input data, which has no corresponding timestamps in the target data, to be used for prediction.
     """
+    if not isinstance(input_data,pd.DataFrame):
+        raise TypeError(f"Parameter input_data must be pandas DataFrame, got {type(input_data)}.")
+    if not isinstance(target_data,pd.DataFrame):
+        raise TypeError(f"Parameter target_data must be pandas DataFrame, got {type(target_data)}.")
+
+    input_data.index = pd.to_datetime(input_data.index)
+    target_data.index = pd.to_datetime(target_data.index)
+
     train_X, train_Y = input_data.align(target_data,join="inner",axis=0)
+    if len(train_X) == 0 or len(train_Y) == 0:
+        raise ValueError("No matching timestamps found. Check dataframe index timestamps.")
+
     inference_data = input_data.drop(train_X.index,axis=0)
     return train_X, train_Y, inference_data

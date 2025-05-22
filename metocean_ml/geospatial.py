@@ -359,7 +359,7 @@ def calculate_bearing(lat0, lon0, lat1, lon1):
     X = np.cos(lat1) * np.sin(lon1-lon0)
     Y = np.cos(lat0) * np.sin(lat1) - np.sin(lat0) * np.cos(lat1) * np.cos(lon1-lon0)
     
-    return np.atan2(X,Y)
+    return np.degrees(np.atan2(X,Y))
 
 def calculate_distance(lat0,lon0,lat1,lon1):
     '''
