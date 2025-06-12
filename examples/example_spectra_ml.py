@@ -17,7 +17,7 @@ from metocean_ml import preprocessing
 import seaborn as sns
 
 # Load data
-data_path = os.path.join(os.path.dirname(__file__),"../datasets/")
+data_path = os.path.join(os.path.dirname(__file__),"../tests/data/")
 input_west = xr.load_dataset(data_path+"origin_nora3_62_5.nc")
 input_north = xr.load_dataset(data_path+"origin_nora3_63_6.nc")
 target_dataset = xr.load_dataset(data_path+"target_norac_62_6.nc")
@@ -42,7 +42,7 @@ X_test_scaled = input_scaler.transform(X_test)
 y_train_scaled = target_scaler.fit_transform(y_train)
 y_test_scaled = target_scaler.transform(y_test)
 
-# Select model, fit and predict
+# Select model, fit and predict. Any sklearn model should work
 model = LinearRegression()
 model.fit(X_train_scaled,y_train_scaled)
 y_predicted_scaled = model.predict(X_test_scaled)
@@ -68,8 +68,8 @@ cmap = "Blues"
 sns.heatmap(predicted_spectra.sel(time=t),cmap=cmap,xticklabels=xticks,yticklabels=yticks,ax=ax[0])
 sns.heatmap(target_spectra.sel(time=t),cmap=cmap,xticklabels=xticks,yticklabels=yticks,ax=ax[1])
 fig.suptitle(f"time = {t.values}")
-ax[0].set_title(f"Predicted spectrum")
-ax[1].set_title(f"Target spectrum")
+ax[0].set_title("Predicted spectrum")
+ax[1].set_title("Target spectrum")
 ax[0].set_ylabel("Frequency")
 ax[0].set_xlabel("Direction")
 ax[1].set_xlabel("Direction")

@@ -477,9 +477,8 @@ def get_fetch(
     directions = np.linspace(0,360,directions,endpoint=False)
     fetch = np.zeros_like(directions)
 
-    if return_landfall:
-        landfall_lats = np.zeros_like(directions)
-        landfall_lons = np.zeros_like(directions)
+    landfall_lats = np.zeros_like(directions)
+    landfall_lons = np.zeros_like(directions)
 
     if not max_search_distance:
         max_search_distance = 1e12

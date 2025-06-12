@@ -6,5 +6,4 @@ docs/build
 metocean_ml.egg-info
 build
 tests/data/eikefet
-*.csv
 *.png
