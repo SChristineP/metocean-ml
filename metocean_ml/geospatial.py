@@ -192,16 +192,6 @@ def wave_properties_from_source_points(origin, spec, lat, lon):
     points = merge_directions_points(points,directions,on_index=False)
 
     return points
-        dir_to = (dir_from + 180) % 360
-        points.append({"node":i,"dir_from":dir_from,"dir_to":dir_to,"r":distance,"lat":y,"lon":x})
-    points = pd.DataFrame(points).sort_values("dir_to").reset_index(drop=True)
-    points["dir_idx"] = np.arange(len(points))
-
-    directions = spectra_tools.directional_spec_info(spec)
-
-    points = merge_directions_points(points,directions,on_index=False)
-
-    return points
 
 def _create_wedge(center_lat, center_lon, dir_from, dir_to, radius_km, edge_resolution=100, arc_resolution=10):
     """
