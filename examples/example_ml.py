@@ -1,13 +1,11 @@
 import matplotlib.pyplot as plt
-import sklearn
-from metocean_ml import ml
+from ..metocean_ml import pipelines
 import numpy as np
 import pandas as pd
-
+from sklearn.metrics import mean_absolute_error,mean_squared_error,r2_score
 
 df_norac = pd.read_csv('../tests/data/NORAC_test.csv',comment='#',index_col=0, parse_dates=True)
 df_nora3 = pd.read_csv('../tests/data/NORA3_test.csv',comment='#',index_col=0, parse_dates=True)
-
 
 # Define training and validation period:
 start_training = '2019-01-01'
@@ -20,7 +18,7 @@ model='GBR' # 'SVR_RBF', 'LSTM', GBR
 var_origin = ['hs','tp','Pdir']
 var_train  = ['hs']
 # Run ML model:
-ts_pred = ml.predict_ts(ts_origin=df_nora3,var_origin=var_origin,ts_train=df_norac.loc[start_training:end_training],var_train=var_train, model=model)
+ts_pred = pipelines.predict_ts(ts_origin=df_nora3,var_origin=var_origin,ts_train=df_norac.loc[start_training:end_training],var_train=var_train, model=model)
 # Plotting a month of data:
 fig, ax = plt.subplots(nrows=1, ncols=1,figsize=(12, 6),gridspec_kw={'top': 0.95,'bottom': 0.150,'left': 0.05,'right': 0.990,'hspace': 0.2,'wspace': 0.2})
 plt.title('Model: '+model+',Training Variables: '+','.join(var_origin))
@@ -48,9 +46,9 @@ plt.close()
 # Scatter plot and metrics:
 plt.scatter(df_norac['hs'].loc[start_valid:end_valid], ts_pred.loc[start_valid:end_valid], color='black')
 plt.title('scatter:'+model+'-'+'_'.join(var_origin))
-plt.text(0, 1.0,'ΜΑΕ:'+str(np.round(sklearn.metrics.mean_absolute_error(df_norac['hs'].loc[start_valid:end_valid], ts_pred.loc[start_valid:end_valid]),3)))
-plt.text(0, 0.8,'$R²$:'+str(np.round(sklearn.metrics.r2_score(df_norac['hs'].loc[start_valid:end_valid], ts_pred.loc[start_valid:end_valid]),3)))
-plt.text(0, 0.6,'RMSE:'+str(np.round(sklearn.metrics.mean_squared_error(df_norac['hs'].loc[start_valid:end_valid], ts_pred.loc[start_valid:end_valid])**0.5,3)))
+plt.text(0, 1.0,'ΜΑΕ:'+str(np.round(mean_absolute_error(df_norac['hs'].loc[start_valid:end_valid], ts_pred.loc[start_valid:end_valid]),3)))
+plt.text(0, 0.8,'$R²$:'+str(np.round(r2_score(df_norac['hs'].loc[start_valid:end_valid], ts_pred.loc[start_valid:end_valid]),3)))
+plt.text(0, 0.6,'RMSE:'+str(np.round(mean_squared_error(df_norac['hs'].loc[start_valid:end_valid], ts_pred.loc[start_valid:end_valid])**0.5,3)))
 plt.xlabel('Hs from NORAC')
 plt.ylabel('Hs from NORAC_pred')
 plt.savefig(model+'-'+'_'.join(var_origin)+'scatter.png')

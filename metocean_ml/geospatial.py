@@ -7,16 +7,11 @@ import matplotlib.colors as mcolors
 import pyproj
 import shapely
 from tqdm import tqdm
-from . import spectra_tools
+from metocean_ml import spectra_tools
 
-## Temporary avoidance! Until Gaute can fix his package.
-try:
-    from roaring_landmask import RoaringLandmask
-    from roaring_landmask import LandmaskProvider
-    provider = LandmaskProvider.Osm
-    landmask = RoaringLandmask.new_with_provider(provider)
-except ImportError as e:
-    print(f"Could not import roaring-landmask: {e}.")
+from roaring_landmask import RoaringLandmask, LandmaskProvider
+provider = LandmaskProvider.Osm
+landmask = RoaringLandmask.new_with_provider(provider)
 
 def is_land(lat,lon):
     """
@@ -187,6 +182,16 @@ def wave_properties_from_source_points(origin, spec, lat, lon):
     for i,(x,y) in enumerate(zip(lon,lat)):
         distance = calculate_distance(origin[0],origin[1],y,x)
         dir_from = calculate_bearing(origin[0],origin[1],y,x)
+        dir_to = (dir_from + 180) % 360
+        points.append({"node":i,"dir_from":dir_from,"dir_to":dir_to,"r":distance,"lat":y,"lon":x})
+    points = pd.DataFrame(points).sort_values("dir_to").reset_index(drop=True)
+    points["dir_idx"] = np.arange(len(points))
+
+    directions = spectra_tools.directional_spec_info(spec)
+
+    points = merge_directions_points(points,directions,on_index=False)
+
+    return points
         dir_to = (dir_from + 180) % 360
         points.append({"node":i,"dir_from":dir_from,"dir_to":dir_to,"r":distance,"lat":y,"lon":x})
     points = pd.DataFrame(points).sort_values("dir_to").reset_index(drop=True)
