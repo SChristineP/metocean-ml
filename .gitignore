@@ -1,0 +1,9 @@
+# File types
+*.pyc
+*.ipynb
+# Folders
+docs/build
+metocean_ml.egg-info
+build
+tests/data/eikefet
+*.png

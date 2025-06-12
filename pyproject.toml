@@ -1,40 +1,31 @@
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
-[tool.setuptools]
-packages = ["metocean_ml"]
-
-[project]
+[tool.poetry]
 name = "metocean-ml"
 version = "0.0.1"
 description = "metocean-ml - machine learning tool for metocean data"
-authors = [
-    {name = "Konstantinos Christakos MET Norway & NTNU"},
-    {name = "Erik Furevik MET Norway", email = "erik.r.furevik@met.no"},
-]
-maintainers = [ 
-    {name = "Erik Furevik, MET Norway", email = "erik.r.furevik@met.no"}
-]
-license = {text = "GPLv3"}
-dependencies = [
-    "matplotlib",
-    "scipy",
-    "numpy",
-    "xarray",
-    "torch",
-    "pandas",
-    "scikit-learn",
-    "tqdm",
-    "shapely",
-    "pyproj",
-    "contextily",
-    "geopandas",
-    "roaring-landmask"
-]
-requires-python = ">=3.9"
+authors = ["Konstantinos Christakos <your-email@example.com>"]
+license = "GPL-3.0-or-later"
 
-[project.optional-dependencies]
-dev = [
-    "pytest","sphinx>6"
-]
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+numpy = "^1.26"
+matplotlib = "^3.8"
+pandas = "^2.2"
+scipy = "^1.13"
+xarray = "^2024.3"
+scikit-learn = "^1.4"
+torch = "^2.3"
+skorch = "^0.15"
+seaborn = "*"
+geopandas = "*"
+contextily = "*"
+roaring_landmask = "*"
+netCDF4 = "*"
+
+[tool.poetry.dev-dependencies]
+pytest = "^8.2"
+pytest-benchmark = "^4.0"
+sphinx = "^7.3"

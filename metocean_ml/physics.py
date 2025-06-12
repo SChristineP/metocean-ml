@@ -12,7 +12,7 @@ def dirmag_to_uv(wind_direction, wind_speed, going_to=True):
         Wind direction (degrees)
     wind_speed : np.ndarray
         Wind Speed (degrees)
-    going_to : bool
+    going_to : bool, default True (oceanographic)
         Controls direction convention, False gives "from" direction.
     '''
     

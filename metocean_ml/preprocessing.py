@@ -104,7 +104,7 @@ def restore_array(data,coords):
 
 
 
-def merge_datasets(data:list[pd.DataFrame,np.ndarray,xr.DataArray,xr.Dataset],
+def merge_datasets(data:list[pd.DataFrame|np.ndarray|xr.DataArray|xr.Dataset],
                    keys=None,
                    resample = "1h",
                    join = "inner",
@@ -132,6 +132,11 @@ def merge_datasets(data:list[pd.DataFrame,np.ndarray,xr.DataArray,xr.Dataset],
         Dictionary of metadata containing the coordinates of the original ND arrays,
         which can be used to restore the original shape from the dataframe.
     """
+
+    for i,d in enumerate(data):
+        if isinstance(d,pd.DataFrame) and isinstance(d.columns,(pd.MultiIndex,list,tuple)):
+            print(f"WARNING: Dataset {i} has multiindex columns. These will be merged into single level string columns. ")
+        
     if keys and (len(keys) != len(data)):
         raise ValueError(f"Got len(data)=={len(data)} while len(keys)=={len(keys)}.")
     if not keys:
@@ -166,6 +171,17 @@ def align_dataframes(input_data:pd.DataFrame,target_data:pd.DataFrame):
     pd.DataFrame
         Inference input data, which has no corresponding timestamps in the target data, to be used for prediction.
     """
+    if not isinstance(input_data,pd.DataFrame):
+        raise TypeError(f"Parameter input_data must be pandas DataFrame, got {type(input_data)}.")
+    if not isinstance(target_data,pd.DataFrame):
+        raise TypeError(f"Parameter target_data must be pandas DataFrame, got {type(target_data)}.")
+
+    input_data.index = pd.to_datetime(input_data.index)
+    target_data.index = pd.to_datetime(target_data.index)
+
     train_X, train_Y = input_data.align(target_data,join="inner",axis=0)
+    if len(train_X) == 0 or len(train_Y) == 0:
+        raise ValueError("No matching timestamps found. Check dataframe index timestamps.")
+
     inference_data = input_data.drop(train_X.index,axis=0)
     return train_X, train_Y, inference_data
