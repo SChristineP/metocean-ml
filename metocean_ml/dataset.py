@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 
 class TimeseriesDataset(Dataset):
     '''

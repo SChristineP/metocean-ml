@@ -12,7 +12,7 @@ def dirmag_to_uv(wind_direction, wind_speed, going_to=True):
         Wind direction (degrees)
     wind_speed : np.ndarray
         Wind Speed (degrees)
-    going_to : bool
+    going_to : bool, default True (oceanographic)
         Controls direction convention, False gives "from" direction.
     '''
     
@@ -62,9 +62,8 @@ def direct_fetch(fetch:pd.Series,
     '''
 
     fetch_dir = fetch.index.values
-    if type(wind_direction)==pd.Series:
+    if type(wind_direction) is pd.Series:
         wind_direction = wind_direction.values
-    T = len(wind_direction)
 
     # Normalized absolute difference between fetch and wind direction
     norm_dir = (fetch_dir[np.newaxis,:] - wind_direction[:,np.newaxis])%360
@@ -93,7 +92,7 @@ def effective_fetch(fetch:pd.Series,
     '''
 
     fetch_dir = fetch.index.values
-    if type(wind_direction)==pd.Series:
+    if type(wind_direction) is pd.Series:
         wind_direction = wind_direction.values
 
     T = len(wind_direction)
@@ -147,7 +146,7 @@ def fetch_laws(
 
     """
     
-    if type(wind)==pd.Series:
+    if type(wind) is pd.Series:
         index = wind.index
         wind = wind.values
         return_df = True
