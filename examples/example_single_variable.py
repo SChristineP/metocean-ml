@@ -18,7 +18,7 @@ end_valid      = '2018-12-31'
 
 # Select method and variables for ML model:
 model='GBR' # 'SVR_RBF', 'LSTM', GBR
-var_origin = ['hs','tp','Pdir']
+var_origin = ['hs','tp','Pdir'] # ['hs','tp','Pdir', 'hs_sea', 'hs_swell'] 
 var_train  = ['hs']
 # Run ML model:
 ts_pred = pipelines.predict_ts(ts_origin=df_nora3,var_origin=var_origin,ts_train=df_norac.loc[start_training:end_training],var_train=var_train, model=model)
