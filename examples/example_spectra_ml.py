@@ -16,7 +16,7 @@ from matplotlib.colors import LogNorm
 from metocean_ml import preprocessing
 import seaborn as sns
 
-# Load data
+# Load data (netcdf format)
 data_path = os.path.join(os.path.dirname(__file__),"../tests/data/")
 input_west = xr.load_dataset(data_path+"origin_nora3_62_5.nc")
 input_north = xr.load_dataset(data_path+"origin_nora3_63_6.nc")
