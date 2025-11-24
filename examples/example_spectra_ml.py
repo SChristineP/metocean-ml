@@ -16,7 +16,7 @@ from matplotlib.colors import LogNorm
 from metocean_ml import preprocessing
 import seaborn as sns
 
-# Load data (netcdf format)
+# Load data (netcdf format) e.g., target is NORAC, input is NORA3
 data_path = os.path.join(os.path.dirname(__file__),"../tests/data/")
 input_west = xr.load_dataset(data_path+"origin_nora3_62_5.nc")
 input_north = xr.load_dataset(data_path+"origin_nora3_63_6.nc")
@@ -42,7 +42,7 @@ X_test_scaled = input_scaler.transform(X_test)
 y_train_scaled = target_scaler.fit_transform(y_train)
 y_test_scaled = target_scaler.transform(y_test)
 
-# Select model, fit and predict. Any sklearn model should work
+# Select model, fit, and predict. Any sklearn model should work
 model = LinearRegression()
 model.fit(X_train_scaled,y_train_scaled)
 y_predicted_scaled = model.predict(X_test_scaled)
