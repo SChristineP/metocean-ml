@@ -121,7 +121,7 @@ if period is None:
 else:
         period_start, period_end = period[0], period[1]
 
-output_file = f'{mode}_{neural_network}_{input_ml_model}_{location}_({period_start} to {period_end})_test'
+output_file = f'{mode}_{neural_network}_{input_ml_model}_{location}_{period_start} to {period_end}_test.nc'
 output_file_target = f'Target_spec_{location}_{period}.nc'
 
 ########## Hyperparameters ##########
