@@ -2,6 +2,9 @@ import torch
 from torch import nn
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
+import time
+from metocean_ml import models
+import numpy as np
 
 class Trainer():
     """
@@ -184,3 +187,171 @@ class Trainer():
                 loss = self.val_lossfunc(outputs,targets)
                 test_loss += loss.item() * inputs.size(0)
         test_loss /= len(test_data.dataset)
+
+
+
+
+def training_step(model, loss_fn, optimizer, train_dataloader):
+    '''
+    Perform one training epoch over the training dataset.
+
+    Parameters
+    - model : nn.Module
+        Model to be trained.
+    - loss_fn : torch.nn.modules.loss._Loss
+        Loss function used to compute the training error
+    - optimizer : torch.optim.Optimizer
+        Optimization algorithm used to update model parameters.
+    - train_dataloader : DataLoader
+        Dataloader providing training batches.
+
+    Returns
+    - train_loss : float
+        Average training loss over the epoch.
+    '''
+
+    train_loss = 0
+
+    for X_batch_spec, y_batch in train_dataloader:
+        model.train()
+        y_pred = model(X_batch_spec)
+        loss = loss_fn(y_pred, y_batch)
+        train_loss += loss.detach().numpy()
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+    train_loss /= len(train_dataloader)
+    return train_loss
+
+def test_step(model, loss_fn, test_dataloader, return_mode='y_preds'):
+    '''
+    Evaluate the model on the test dataset.
+
+    Computes predictions for the test set and optionally calculates the
+    loss for evaluation tracking.
+
+    Parameters
+    - model : nn.Module
+        Model used for inference.
+    - loss_fn : torch.nn.modules.loss._Loss
+        Loss function used to compute test loss.
+    - test_dataloader : DataLoader
+        Dataloader providing test batches.
+    - return_mode : str, default='y_preds'
+        Controls the output mode:
+        - 'y_preds'  → returns predictions
+        - 'test_loss' → returns computed test loss
+
+    Returns
+    tuple
+        If return_mode == 'y_preds':
+            (y_preds, 0)
+        If return_mode == 'test_loss':
+            (0, test_loss)
+    '''
+
+    model.eval()
+    test_loss = 0
+    y_preds = []
+    with torch.inference_mode():
+        for X_batch_spec, y_batch in test_dataloader:
+            test_pred = model(X_batch_spec)
+           
+            if return_mode == 'test_loss':
+                loss = loss_fn(test_pred, y_batch)
+                test_loss += loss.detach().numpy()
+            
+            elif return_mode == 'y_preds':
+                y_preds.append(test_pred)
+        
+        if return_mode == 'test_loss':
+            test_loss /= len(test_dataloader)
+
+    if return_mode == 'y_preds':
+        y_preds = torch.cat(y_preds, dim=0)
+
+    return y_preds, test_loss
+
+def training_step_multiple_input_shapes(model, loss_fn, optimizer, train_dataloader):
+    '''
+    Perform one training epoch using multiple input types.
+
+    Parameters
+    - model : nn.Module
+        Model to be trained.
+    - loss_fn : torch.nn.modules.loss._Loss
+        Loss function used to compute the training error
+    - optimizer : torch.optim.Optimizer
+        Optimization algorithm used to update model parameters.
+    - train_dataloader : DataLoader
+        Dataloader providing training batches.
+
+    Returns
+    - train_loss : float
+        Average training loss over the epoch.
+    '''
+
+    train_loss = 0
+    for X_batch_spec, X_batch_wind, X_batch_map, y_batch in train_dataloader:
+        model.train()
+        y_pred = model(X_batch_spec, X_batch_wind, X_batch_map)
+        loss = loss_fn(y_pred, y_batch)
+        train_loss += loss.detach().numpy()
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+    train_loss /= len(train_dataloader)
+    return train_loss
+
+
+def test_step_multiple_input_shapes(model, loss_fn, test_dataloader, return_mode='y_preds'):
+    '''
+    Evaluate the model on the test dataset using multiple input types.
+
+    Computes predictions for the test set and optionally calculates the
+    loss for evaluation tracking.
+
+    Parameters
+    - model : nn.Module
+        Model used for inference.
+    - loss_fn : torch.nn.modules.loss._Loss
+        Loss function used to compute test loss.
+    - test_dataloader : DataLoader
+        Dataloader providing test batches.
+    - return_mode : str, default='y_preds'
+        Controls the output mode:
+        - 'y_preds'  → returns predictions
+        - 'test_loss' → returns computed test loss
+
+    Returns
+    tuple
+        If return_mode == 'y_preds':
+            (y_preds, 0)
+        If return_mode == 'test_loss':
+            (0, test_loss)
+    '''
+    model.eval()
+    test_loss = 0
+    y_preds = []
+    with torch.inference_mode():
+        for X_batch_spec, X_batch_wind, X_batch_map, y_batch in test_dataloader:
+            y_batch_pred = model(X_batch_spec, X_batch_wind, X_batch_map)
+
+            if return_mode == 'test_loss':
+                loss = loss_fn(y_batch_pred, y_batch)
+                test_loss += loss.detach().numpy()
+            
+            elif return_mode == 'y_preds':
+                y_preds.append(y_batch_pred)
+
+           
+        if return_mode == 'test_loss':
+            test_loss /= len(test_dataloader)
+
+    if return_mode == 'y_preds':
+        y_preds = torch.cat(y_preds, dim=0)
+    
+    return y_preds, test_loss
+
